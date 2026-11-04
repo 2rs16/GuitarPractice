@@ -96,13 +96,13 @@ class GuitarPracticeApp:
         try:
             self.routine_count = int(self.routine_count_input.get())
             self.routine_repetitions = int(self.repetitions_input.get())
-            low, high = int(self.min_bpm.get()), int(self.max_bpm.get())
+            if not 1 <= self.routine_repetitions <= 100:
+                raise ValueError("루틴당 반복 횟수는 1~100회로 입력하세요.")
             mode = self.mode_var.get()
             if mode == "routine":
+                low, high = int(self.min_bpm.get()), int(self.max_bpm.get())
                 if not 1 <= self.routine_count <= 30:
                     raise ValueError("루틴 개수는 1~30개로 입력하세요.")
-                if not 1 <= self.routine_repetitions <= 100:
-                    raise ValueError("루틴당 반복 횟수는 1~100회로 입력하세요.")
                 if low < 40 or high > 240 or low > high:
                     raise ValueError("BPM은 40~240 범위에서 최소값이 최대값 이하여야 합니다.")
             else:
@@ -228,6 +228,8 @@ class GuitarPracticeApp:
         self.after_id = self.root.after(30, self._tick)
 
     def search_song(self) -> None:
+        if self.active:
+            return
         query = (self.search_entry.get() or "").strip()
         if not query:
             messagebox.showwarning("검색", "검색어를 입력하세요.")
@@ -249,9 +251,8 @@ class GuitarPracticeApp:
             with urllib_request.urlopen(request, timeout=10) as response:
                 payload = json.loads(response.read().decode("utf-8", errors="replace"))
         except (urllib_error.URLError, TimeoutError, ValueError, json.JSONDecodeError) as error:
-            self.root.after(0, lambda: self._apply_search_error(
-                f"인터넷 연결을 확인해 주세요.\n{error.__class__.__name__}: {error}"
-            ))
+            message = f"인터넷 연결을 확인해 주세요.\n{error.__class__.__name__}: {error}"
+            self.root.after(0, lambda: self._apply_search_error(message))
             return
 
         results = []
@@ -299,7 +300,9 @@ class GuitarPracticeApp:
         self.search_status_label.config(text=f"{len(results)}개의 결과를 찾았습니다.", fg="#8de0bd")
 
     def on_search_result_selected(self, event=None) -> None:
-        if self.search_in_progress or not getattr(self, "search_results_data", []):
+        if self.active or self.search_in_progress:
+            return
+        if not getattr(self, "search_results_data", []):
             return
         selection = self.search_results.curselection()
         if not selection:
@@ -316,10 +319,11 @@ class GuitarPracticeApp:
             self.goal_duration_seconds = 0
             self.song_length_label.config(text="곡 길이 정보 없음")
             self.search_status_label.config(text=f"선택됨: {item['title']} ({item['artist']}) / 곡 길이 정보 없음", fg="#8de0bd")
-        self.session_target_seconds = 0
         self.time_goal_label.config(text="목표 시간: 설정 전")
 
     def apply_manual_duration(self) -> None:
+        if self.active:
+            return
         value = (self.manual_duration_entry.get() or "").strip()
         if not value:
             messagebox.showwarning("곡 길이 입력", "곡 길이를 입력해 주세요. (예: 3:20)")

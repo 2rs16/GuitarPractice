@@ -50,9 +50,9 @@ def build_ui(app) -> None:
     tk.Radiobutton(mode_frame, text="곡 길이 기반 시간 모드", variable=app.mode_var, value="time",
                    bg=PANEL, fg=TEXT, selectcolor=PANEL, activebackground=PANEL,
                    font=("Malgun Gothic", 10)).pack(anchor="w")
+    app.session_inputs = [app.routine_count_input, app.repetitions_input,
+                          app.level_menu, app.min_bpm, app.max_bpm, mode_frame]
 
-    app.routine_count_input = field(setup, "루틴 개수", "5")
-    app.repetitions_input = field(setup, "루틴당 반복 횟수", "4")
     app.difficulty = tk.StringVar(value="Medium")
     tk.Label(setup, text="난이도", bg=PANEL, fg=MUTED,
              font=("Malgun Gothic", 10)).pack(anchor="w", pady=(14, 5))

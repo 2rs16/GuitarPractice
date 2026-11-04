@@ -1,6 +1,6 @@
 # 기타 연습 루틴 생성기
 
-이 앱은 오프라인 데스크톱 환경에서 동작하는 기타 연습 루틴 생성기입니다. 기존 루틴 개수 모드와 곡 길이 기반 시간 모드를 모두 지원합니다.
+이 앱은 기본 연습은 오프라인으로 가능하지만, 곡 검색은 iTunes 공개 검색 API를 사용하므로 인터넷 연결이 필요합니다. 기존 루틴 개수 모드와 곡 길이 기반 시간 모드를 모두 지원합니다.
 
 ## 기능 요약
 
@@ -17,7 +17,14 @@
 ## 실행
 
 ```powershell
-python main.py
+uv sync --locked
+uv run main.py
+```
+
+## 검사
+
+```powershell
+uv run python -m py_compile main.py routine.py view.py
 ```
 
 ## 동작 방식
@@ -48,18 +55,3 @@ python main.py
 - 곡 길이 정보가 없거나 유효하지 않으면 `분:초` 수동 입력을 사용합니다.
 - 인터넷 연결이 실패해도 기존 루틴 모드는 사용 가능하며, 검색/시간 모드는 제한됩니다.
 - 현재 구현은 로컬 데스크톱 Tkinter 앱이며, 외부 웹 서버나 백엔드가 없습니다.
-
-## 검증
-
-```powershell
-python -m py_compile main.py routine.py view.py
-python main.py
-python -m uv sync --locked
-```
-
-`uv` 환경은 다음처럼 확인할 수 있습니다.
-
-```powershell
-python -m uv --version
-python -m uv run python -m py_compile main.py routine.py view.py
-```
